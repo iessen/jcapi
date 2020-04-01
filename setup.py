@@ -5,13 +5,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="jcapi",
-    version="0.0.1",
+    version="0.0.2",
     author="ewg",
     author_email="essen.wang@outlook.com",
     description="home-assistant skill api from jiachang.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/iessen/jiachang-ha.git",
+    url="https://github.com/iessen/jcapi.git",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
