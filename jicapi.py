@@ -111,8 +111,3 @@ class JicAPIException(Exception):
     pass
 
 
-test=JiachangApi()
-s = test.get_devices_by_type("switch")
-for i in s:
-    print(i)
-# print(s)
