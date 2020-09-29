@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="jcapi",
-    version="0.0.2",
+    version="0.0.6",
     author="ewg",
     author_email="essen.wang@outlook.com",
     description="home-assistant skill api from jiachang.",
