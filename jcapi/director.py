@@ -1,25 +1,27 @@
-"""Handles communication with a Control4 Director, and provides functions for getting details about items on the Director.
+"""Handles communication with a Jiachang Director, and provides functions for getting details about items on the Director.
 """
 import aiohttp
 import async_timeout
 import json
 from .error_handling import checkResponseForError
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 
-class C4Director:
+class JcDirector:
     def __init__(
             self,
             ip,
             director_bearer_token,
             session_no_verify_ssl: aiohttp.ClientSession = None,
     ):
-        """Creates a Control4 Director object.
+        """Creates a Jiachang Director object.
 
         Parameters:
-            `ip` - The IP address of the Control4 Director/Controller.
-            todo: change to server ip and port
+            `ip` - The IP address of the Jiachang Director/Controller.
             "/home/status.php&hictoken=2802-1572318277-980006311-18755fdbf8-c525d56258"
-            `director_bearer_token` - The bearer token used to authenticate with the Director. See `pyControl4.account.C4Account.getDirectorBearerToken` for how to get this.
+            `director_bearer_token` - The bearer token used to authenticate with the Director. See `pyJiachang.account.JcAccount.getDirectorBearerToken` for how to get this.
 
             `session` - (Optional) Allows the use of an `aiohttp.ClientSession` object for all network requests. This session will not be closed by the library.
             If not provided, the library will open and close its own `ClientSession`s as needed.
@@ -36,12 +38,13 @@ class C4Director:
         Parameters:
             `uri` - The API URI to send the request to. Do not include the IP address of the Director.
 
-            `command` - The Control4 command to send.
+            `command` - The Jiachang command to send.
 
             `params` - The parameters of the command, provided as a dictionary.
         """
         url = self.base_url + uri + "?hictoken=" + self.token
         json_dict = params
+        _LOGGER.error("base_url is %s", uri)
 
         if self.session is None:
             async with aiohttp.ClientSession() as session:
@@ -70,7 +73,7 @@ class C4Director:
         """Returns a JSON list of the details of the specified item.
 
         Parameters:
-            `item_id` - The Control4 item ID.
+            `item_id` - The Jiachang item ID.
         """
         data = {
             "rs": "getAttr",
@@ -78,64 +81,26 @@ class C4Director:
         }
         return await self.request(uri="/devattr/devattr.php", params=data)
 
-    async def get_item_variable_value(self, item_id, var_name):
+    async def get_item_variable_value(self, item_id, var_name, dev_type):
         """Returns the value of the specified variable for the specified item as a string.
 
         Parameters:
-            `item_id` - The Control4 item ID.
+            `item_id` - The Jiachang item ID.
 
-            `var_name` - The Control4 variable name.
+            `var_name` - The Jiachang variable name.
         """
         data = await self.get_item_info(item_id)
 
         if data:
             json_dictionary = json.loads(data)
-            return json_dictionary["value"].get(var_name,0)
+            if dev_type == "switch" or dev_type == "cl" or dev_type == "cl1":
+                return json_dictionary["value"]
+            if dev_type == "color":
+                return json_dictionary["value"].get(var_name, 0)
+            else:
+                return json_dictionary["value"].get(var_name,0)
         else:
             raise ValueError(
                 f"Empty response recieved from Director! The variable {var_name} doesn't seem to exist for item {item_id}."
             )
-
-    #
-    # async def getAllItemVariableValue(self, var_name):
-    #     """Returns a dictionary with the values of the specified variable for all items that have it.
-    #
-    #     Parameters:
-    #         `var_name` - The Control4 variable name.
-    #     """
-    #     data = await self.sendGetRequest(
-    #         "/api/v1/items/variables?varnames={}".format(var_name)
-    #     )
-    #     if data == "[]":
-    #         raise ValueError(
-    #             "Empty response recieved from Director! The variable {} doesn't seem to exist for any items.".format(
-    #                 var_name
-    #             )
-    #         )
-    #     jsonDictionary = json.loads(data)
-    #     return jsonDictionary
-    #
-    # async def getItemCommands(self, item_id):
-    #     """Returns a JSON list of the commands available for the specified item.
-    #
-    #     Parameters:
-    #         `item_id` - The Control4 item ID.
-    #     """
-    #     return await self.sendGetRequest("/api/v1/items/{}/commands".format(item_id))
-    #
-    # async def getItemNetwork(self, item_id):
-    #     """Returns a JSON list of the network information for the specified item.
-    #
-    #     Parameters:
-    #         `item_id` - The Control4 item ID.
-    #     """
-    #     return await self.sendGetRequest("/api/v1/items/{}/network".format(item_id))
-    #
-    # async def getItemBindings(self, item_id):
-    #     """Returns a JSON list of the bindings information for the specified item.
-    #
-    #     Parameters:
-    #         `item_id` - The Control4 item ID.
-    #     """
-    #     return await self.sendGetRequest("/api/v1/items/{}/bindings".format(item_id))
 

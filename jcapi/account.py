@@ -1,5 +1,5 @@
-"""Authenticates with the Control4 API, retrieves account and registered
-controller info, and retrieves a bearer token for connecting to a Control4 Director.
+"""Authenticates with the Jiachang API, retrieves account and registered
+controller info, and retrieves a bearer token for connecting to a Jiachang Director.
 """
 import aiohttp
 import async_timeout
@@ -15,16 +15,16 @@ GET_CONTROLLERS_ENDPOINT = "https://c.jia.mn/App/a/frame/setLogin.php"
 _LOGGER = logging.getLogger(__name__)
 
 
-class C4Account:
+class JcAccount:
     def __init__(
         self, username, password, session: aiohttp.ClientSession = None,
     ):
-        """Creates a Control4 account object.
+        """Creates a Jiachang account object.
 
         Parameters:
-            `username` - Control4 account username/phone_No.
+            `username` - Jiachang account username/phone_No.
 
-            `password` - Control4 account password.
+            `password` - Jiachang account password.
 
             `session` - (Optional) Allows the use of an `aiohttp.ClientSession` object for all network requests. This session will not be closed by the library.
             If not provided, the library will open and close its own `ClientSession`s as needed.
@@ -35,7 +35,7 @@ class C4Account:
 
     async def __sendAccountAuthRequest(self):
         """Used internally to retrieve an account bearer token. Returns the entire
-        JSON response from the Control4 auth API.
+        JSON response from the Jiachang auth API.
         """
         dataDictionary = {
             "rs": "login",
@@ -60,9 +60,9 @@ class C4Account:
                     return await resp.text()
 
     async def __get_director_control_url(self, uri):
-        """Used internally to send GET requests to the Control4 API,
+        """Used internally to send GET requests to the Jiachang API,
         authenticated with the account bearer token. Returns the entire JSON
-        response from the Control4 auth API.
+        response from the Jiachang auth API.
 
         Parameters:
             `uri` - Full URI to send GET request to.
@@ -126,7 +126,7 @@ class C4Account:
                     return await resp.text()
 
     async def get_account_token(self):
-        """Gets an account bearer token for making Control4 online API requests.
+        """Gets an account bearer token for making Jiachang online API requests.
         Returns:
             {
                 "login":true,
@@ -169,7 +169,7 @@ class C4Account:
         return json_dict["b"]
 
     async def get_director_token(self, controller_id):
-        """Returns a dictionary with a director bearer token for making Control4 Director API requests, and its expiry time (generally 86400 seconds after current time)
+        """Returns a dictionary with a director bearer token for making Jiachang Director API requests, and its expiry time (generally 86400 seconds after current time)
         returns:
             "1189120558-1589243259-560371073-9a35aa5e49-bdb97068cf"
 

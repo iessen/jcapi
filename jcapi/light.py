@@ -1,15 +1,15 @@
-"""Controls Control4 Light devices.
+"""Controls Jiachang Light devices.
 """
 
 
-class C4Light:
-    def __init__(self, C4Director, item_id):
-        """Creates a Control4 Light object.
+class JcLight:
+    def __init__(self, JcDirector, item_id):
+        """Creates a Jiachang Light object.
 
         Parameters:
-            `C4Director` - A `pyControl4.director.C4Director` object that corresponds to the Control4 Director that the light is connected to.
+            `JcDirector` - A `jcapi.director.JcDirector` object that corresponds to the Jiachang Director that the light is connected to.
 
-            `item_id` - The Control4 item ID of the light.
+            `item_id` - The Jiachang item ID of the light.
         Light varis:
             {
                 "type": "color",
@@ -51,28 +51,28 @@ class C4Light:
                 "phydev": "1"
             }
         """
-        self.director = C4Director
+        self.director = JcDirector
         self.item_id = item_id
 
     async def get_level(self):
         """Returns the level of a dimming-capable light as an int 0-100.
-        Will cause an error if called on a non-dimmer switch. Use `getState()` instead.
+        Will cause an error if called on a non-dimmer light. Use `getState()` instead.
         """
-        value = await self.director.get_item_variable_value(self.item_id, "l")
+        value = await self.director.get_item_variable_value(self.item_id, "l",dev_type="color")
         return int(value)
 
     async def get_state(self):
-        """Returns the power state of a dimmer or switch as a boolean (True=on, False=off).
+        """Returns the power state of a dimmer or light as a boolean (True=on, False=off).
         """
-        value = await self.director.get_item_variable_value(self.item_id, "m")
+        value = await self.director.get_item_variable_value(self.item_id, "m", dev_type="color")
         if value == "-1":
             return False
         else:
             return True
 
     async def set_level(self, level):
-        """Sets the light level of a dimmer or turns on/off a switch.
-        Any `level > 0` will turn on a switch, and `level = 0` will turn off a switch.
+        """Sets the light level of a dimmer or turns on/off a light.
+        Any `level > 0` will turn on a light, and `level = 0` will turn off a light.
 
         Parameters:
             `level` - (int) 0-100
@@ -85,7 +85,7 @@ class C4Light:
             "rsargs[1][w]": "0",
             "rsargs[1][s]": "0"
         }
-        await self.director.request(uri="/devattr/devattr.php", params=data)
+        return await self.director.request(uri="/devattr/devattr.php", params=data)
 
     async def turn_on(self):
         """turns on a light.
@@ -95,7 +95,7 @@ class C4Light:
             "rsargs[]": self.item_id,
             "rsargs[1][m]": "0",
         }
-        await self.director.request(uri="/devattr/devattr.php", params=data)
+        return await self.director.request(uri="/devattr/devattr.php", params=data)
 
     async def turn_off(self):
         """turns off a light.
@@ -105,4 +105,4 @@ class C4Light:
             "rsargs[]": self.item_id,
             "rsargs[1][m]": "-1",
         }
-        await self.director.request(uri="/devattr/devattr.php", params=data)
+        return await self.director.request(uri="/devattr/devattr.php", params=data)
