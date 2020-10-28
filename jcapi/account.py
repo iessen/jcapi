@@ -59,7 +59,7 @@ class JcAccount:
                     await checkResponseForError(await resp.text())
                     return await resp.text()
 
-    async def __get_director_control_url(self, uri):
+    async def __get_director_control_url(self, uri, token):
         """Used internally to send GET requests to the Jiachang API,
         authenticated with the account bearer token. Returns the entire JSON
         response from the Jiachang auth API.
@@ -72,7 +72,7 @@ class JcAccount:
         }
         # _LOGGER.info("token is %s", self.account_bearer_token)
         try:
-            url = uri + "?hictoken=" + self.account_bearer_token
+            url = uri + "?hictoken=" + token
             
         except AttributeError:
             msg = "The account bearer token is missing - was your username/password correct? "
@@ -146,7 +146,7 @@ class JcAccount:
             _LOGGER.error(msg + data)
             raise
 
-    async def get_controller_url(self):
+    async def get_controller_url(self, token):
         """Returns a dictionary of the information for all controllers registered to an account.
         get server address.获取接口请求地址
 
@@ -163,7 +163,7 @@ class JcAccount:
             }
             ```
         """
-        data = await self.__get_director_control_url(GET_CONTROLLERS_ENDPOINT)
+        data = await self.__get_director_control_url(GET_CONTROLLERS_ENDPOINT,token)
         json_dict = json.loads(data)
         # _LOGGER.info(json_dict["b"])# print(jsonDictionary["b"])
         return json_dict["b"]
